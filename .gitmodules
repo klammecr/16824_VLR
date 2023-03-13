@@ -1,0 +1,3 @@
+[submodule "generative-modeling"]
+	path = generative-modeling
+	url = git@github.com:visual-learning/generative-modeling.git
