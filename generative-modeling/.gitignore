@@ -1,5 +1,6 @@
 *.venv*
 data_gan*
+data_ls_gan*
 
 vae_solutions/data/
 gan/data_gan/

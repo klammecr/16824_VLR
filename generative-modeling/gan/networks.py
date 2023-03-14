@@ -57,6 +57,7 @@ class DownSampleConv2D(torch.jit.ScriptModule):
         
         # 2. Then split channel wise into (downscale_factor^2 x batch x channel x height x width) images
         C_new = int(C // self.downscale_factor**2)
+        # I feel better about doing below instead of what was suggested, I don't think it really matters tbh, though
         x_down_rsz = x_down.view(N, int(self.downscale_factor**2), C_new, H, W)
 
         # 3. Average across dimension 0, apply convolution and return output
