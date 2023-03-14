@@ -31,8 +31,8 @@ def get_optimizers_and_schedulers(gen, disc):
     # 1.2 Get optimizers and learning rate schedulers.
     # 1. Construct the optimizers for the discriminator and generator.
     # Both should use the Adam optimizer with learning rate of .0002 and Beta1 = 0, Beta2 = 0.9.
-    optim_discriminator = torch.optim.Adam(gen.parameters() , lr=.0002, betas=[0., 0.9])
-    optim_generator     = torch.optim.Adam(disc.parameters(), lr=.0002, betas=[0., 0.9])
+    optim_discriminator = torch.optim.Adam(disc.parameters(), lr=.0002, betas=[0., 0.9])
+    optim_generator     = torch.optim.Adam(gen.parameters(),  lr=.0002, betas=[0., 0.9])
 
     # 2. Construct the learning rate schedulers for the generator and discriminator.
     # The learning rate for the discriminator should be decayed to 0 over 500K iterations.
@@ -111,7 +111,7 @@ def train_model(
                 # 2. Compute discriminator output on the train batch.
                 disc_real = disc.forward(train_batch)
                 # 3. Compute the discriminator output on the generated data.
-                disc_fake = disc.forward(gen_imgs)
+                disc_fake = disc.forward(gen_imgs.detach())
 
                 # TODO: 1.5 Compute the interpolated batch and run the discriminator on it.
 
@@ -128,7 +128,6 @@ def train_model(
                 with torch.cuda.amp.autocast(enabled=amp_enabled):
                     # 1.2: compute generator and discriminator output on generated data.
                     generated_samples = gen.forward(train_batch.shape[0])
-                    disc_real = disc.forward(train_batch)
                     disc_fake = disc.forward(generated_samples)
                     generator_loss = gen_loss_fn(disc_fake)
 
@@ -141,7 +140,7 @@ def train_model(
                 with torch.no_grad():
                     with torch.cuda.amp.autocast(enabled=amp_enabled):
                         # 1.2: Generate samples using the generator, make sure they lie in the range [0, 1].
-                        gen_imgs = gen.forward(train_batch.shape[0])
+                        gen_imgs = gen.forward(train_batch.shape[0]).detach()
                         gen_imgs = (gen_imgs + 1) / 2
                         assert torch.max(gen_imgs) <= 1 and torch.min(gen_imgs) >= 0
                         
@@ -161,7 +160,7 @@ def train_model(
                         dataset_name="cub",
                         dataset_resolution=32,
                         z_dimension=128,
-                        batch_size=256,
+                        batch_size=128,
                         num_gen=10_000,
                     )
                     print(f"Iteration {iters} FID: {fid}")
@@ -187,7 +186,7 @@ def train_model(
         dataset_name="cub",
         dataset_resolution=32,
         z_dimension=128,
-        batch_size=256,
+        batch_size=128,
         num_gen=50_000,
     )
     print(f"Final FID (Full 50K): {fid}")

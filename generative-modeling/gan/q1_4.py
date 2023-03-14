@@ -9,12 +9,15 @@ from train import train_model
 
 
 def compute_discriminator_loss(
-    discrim_real, discrim_fake, discrim_interp, interp, lamb
+    discrim_real, discrim_fake, discrim_interp = None, interp = None, lamb = None
 ):
     """
     TODO 1.4.1: Implement LSGAN loss for discriminator.
     Do not use discrim_interp, interp, lamb. They are placeholders for Q1.5.
     """
+    a = torch.zeros_like(discrim_fake)
+    b = torch.zeros_like(discrim_real)
+    loss = 0.5 * ((discrim_real - b) ** 2).mean() + 0.5 * ((discrim_fake - a) ** 2).mean()
     return loss
 
 
@@ -22,6 +25,9 @@ def compute_generator_loss(discrim_fake):
     """
     TODO 1.4.1: Implement LSGAN loss for generator.
     """
+    # Value we want D to believe which is that the fakes are real
+    c = torch.ones_like(discrim_fake)
+    loss = 0.5 * ((discrim_fake - c)**2).mean()
     return loss
 
 if __name__ == "__main__":
