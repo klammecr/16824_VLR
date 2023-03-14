@@ -10,7 +10,7 @@ from train import train_model
 
 
 def compute_discriminator_loss(
-    discrim_real, discrim_fake, discrim_interp, interp, lamb
+    discrim_real, discrim_fake, discrim_interp = None, interp = None, lamb = None
 ):
     """
     TODO 1.3.1: Implement GAN loss for discriminator.
@@ -22,7 +22,13 @@ def compute_discriminator_loss(
     # Term 2:
     # - High loss if the fake (generated) has a high probability of being real
     # - Small loss if the fake has a low probability of being real
-    loss = -torch.sum(torch.log(discrim_real) + torch.log(1 - discrim_fake))
+    # discrim_real = torch.sigmoid(discrim_real)
+    # discrim_fake = torch.sigmoid(discrim_fake)
+    # loss = -torch.sum(torch.log(discrim_real+1e-12) + torch.log(1+1e-12 - discrim_fake))
+
+    loss = F.binary_cross_entropy_with_logits(discrim_real, torch.ones_like(discrim_real)) + \
+           F.binary_cross_entropy_with_logits(discrim_fake, torch.zeros_like(discrim_fake))
+
     return loss
 
 
@@ -32,8 +38,11 @@ def compute_generator_loss(discrim_fake):
     """
     # Low loss if the fake has a low probability of being real
     # Very negative loss if the fake has a high probability of being real (discriminator was fooled)
-    loss = torch.sum(torch.log(1 - discrim_fake))
-    # loss = -torch.log(discrim_fake) # If fakes are fake, this is a very high loss, if fakes are thought to be real this is low
+    # discrim_fake = torch.sigmoid(discrim_fake)
+    # loss = torch.sum(torch.log(1+1e-12 - discrim_fake))
+
+    # If fakes are fake, this is a very high loss, if fakes are thought to be real this is low
+    loss = F.binary_cross_entropy_with_logits(discrim_fake, torch.ones_like(discrim_fake))
     return loss
 
 

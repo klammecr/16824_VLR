@@ -13,7 +13,7 @@ from utils import get_fid, interpolate_latent_space, save_plot
 from networks import Discriminator, Generator
 
 def rescale_img(x):
-    return 2 * x - 1
+    return 2 * (x - 0.5)
 
 def build_transforms():
     # 1.2: Add two transforms:
@@ -115,22 +115,24 @@ def train_model(
 
                 # TODO: 1.5 Compute the interpolated batch and run the discriminator on it.
 
+                # Calculate loss using AMP
+                discriminator_loss = disc_loss_fn(disc_real, disc_fake)
+
             # Opimization for discriminator
             optim_discriminator.zero_grad(set_to_none=True)
-            discriminator_loss = disc_loss_fn(disc_real, disc_fake)
             scaler.scale(discriminator_loss).backward()
             scaler.step(optim_discriminator)
             scheduler_discriminator.step()
 
             if iters % 5 == 0:
-                # with torch.cuda.amp.autocast(enabled=amp_enabled):
-                #     # 1.2: compute generator and discriminator output on generated data.
-                #     generated_samples = gen.forward(train_batch.shape[0])
-                #     disc_real = disc.forward(train_batch)
-                #     disc_fake = disc.forward(generated_samples)
+                with torch.cuda.amp.autocast(enabled=amp_enabled):
+                    # 1.2: compute generator and discriminator output on generated data.
+                    generated_samples = gen.forward(train_batch.shape[0])
+                    disc_real = disc.forward(train_batch)
+                    disc_fake = disc.forward(generated_samples)
+                    generator_loss = gen_loss_fn(disc_fake)
 
                 optim_generator.zero_grad(set_to_none=True)
-                generator_loss = gen_loss_fn(disc_fake)
                 scaler.scale(generator_loss).backward()
                 scaler.step(optim_generator)
                 scheduler_generator.step()
@@ -139,6 +141,8 @@ def train_model(
                 with torch.no_grad():
                     with torch.cuda.amp.autocast(enabled=amp_enabled):
                         # 1.2: Generate samples using the generator, make sure they lie in the range [0, 1].
+                        gen_imgs = gen.forward(train_batch.shape[0])
+                        gen_imgs = (gen_imgs + 1) / 2
                         assert torch.max(gen_imgs) <= 1 and torch.min(gen_imgs) >= 0
                         
                     save_image(
