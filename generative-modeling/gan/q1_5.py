@@ -7,22 +7,30 @@ from networks import Discriminator, Generator
 from train import train_model
 
 
-def compute_discriminator_loss(
+def compute_wgan_discriminator_loss(
     discrim_real, discrim_fake, discrim_interp, interp, lamb
 ):
     """
-    TODO 1.5.1: Implement WGAN-GP loss for discriminator.
+    1.5.1: Implement WGAN-GP loss for discriminator.
     loss = E[D(fake_data)] - E[D(real_data)] + lambda * E[(|| grad wrt interpolated_data (D(interpolated_data))|| - 1)^2]
     """
+    # Calculate the gradient of discrim_interp
+    grad_disc_interp = torch.autograd.grad(discrim_interp.sum(), interp, retain_graph=True, create_graph=True)[0]
+
+    # Gradient penalization, find the norm over each image and average it
+    grad_disc_interp  = grad_disc_interp.view(grad_disc_interp.shape[0], -1)
+    grad_peanlty      = lamb * (torch.norm(grad_disc_interp, dim = 1) - 1)**2
+
+    loss = discrim_fake.mean() - discrim_real.mean() + grad_peanlty.mean()
     return loss
 
 
 def compute_generator_loss(discrim_fake):
     """
-    TODO 1.5.1: Implement WGAN-GP loss for generator.
+    1.5.1: Implement WGAN-GP loss for generator.
     loss = - E[D(fake_data)]
     """
-    return loss
+    return -discrim_fake.mean()
 
 
 if __name__ == "__main__":
@@ -32,7 +40,7 @@ if __name__ == "__main__":
     prefix = "data_wgan_gp/"
     os.makedirs(prefix, exist_ok=True)
 
-    # TODO 1.5.2: Run this line of code.
+    # 1.5.2: Run this line of code.
     train_model(
         gen,
         disc,
@@ -40,7 +48,7 @@ if __name__ == "__main__":
         batch_size=256,
         prefix=prefix,
         gen_loss_fn=compute_generator_loss,
-        disc_loss_fn=compute_discriminator_loss,
+        disc_loss_fn=compute_wgan_discriminator_loss,
         log_period=1000,
         amp_enabled=not args.disable_amp,
     )

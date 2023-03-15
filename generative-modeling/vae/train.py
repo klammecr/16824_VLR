@@ -19,7 +19,7 @@ def ae_loss(model, x):
     TODO 2.2: fill in MSE loss between x and its reconstruction.
     return loss, {recon_loss = loss}
     """
-
+    loss = F.mse_loss(model.decoder(model.encoder(x)), x)
     return loss, OrderedDict(recon_loss=loss)
 
 def vae_loss(model, x, beta = 1):
@@ -42,8 +42,9 @@ def linear_beta_scheduler(max_epochs=None, target_val = 1):
     TODO 2.8 : Fill in helper. The value returned should increase linearly
     from 0 at epoch 0 to target_val at epoch max_epochs
     """
-    def _helper(epoch):
-    return _helper
+    #def _helper(epoch):
+    #return _helper
+    pass
 
 def run_train_epoch(model, loss_mode, train_loader, optimizer, beta = 1, grad_clip = 1):
     model.train()

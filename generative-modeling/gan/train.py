@@ -10,7 +10,6 @@ from torchvision.datasets import VisionDataset
 
 # In House
 from utils import get_fid, interpolate_latent_space, save_plot
-from networks import Discriminator, Generator
 
 def rescale_img(x):
     return 2 * (x - 0.5)
@@ -37,6 +36,7 @@ def get_optimizers_and_schedulers(gen, disc):
     # 2. Construct the learning rate schedulers for the generator and discriminator.
     # The learning rate for the discriminator should be decayed to 0 over 500K iterations.
     # The learning rate for the generator should be decayed to 0 over 100K iterations.
+
     scheduler_discriminator = torch.optim.lr_scheduler.LambdaLR(optim_discriminator, lambda x: max(1 - (x / 500e3), 0))
     scheduler_generator     = torch.optim.lr_scheduler.LambdaLR(optim_generator,     lambda x: max(1 - (x / 100e3), 0))
 
@@ -113,10 +113,16 @@ def train_model(
                 # 3. Compute the discriminator output on the generated data.
                 disc_fake = disc.forward(gen_imgs.detach())
 
-                # TODO: 1.5 Compute the interpolated batch and run the discriminator on it.
-
-                # Calculate loss using AMP
-                discriminator_loss = disc_loss_fn(disc_real, disc_fake)
+                # 1.5 Compute the interpolated batch and run the discriminator on it.
+                if disc_loss_fn.__name__ == "compute_wgan_discriminator_loss":
+                    # Random number for each image in the batch
+                    eps          = torch.rand(train_batch.shape[0], 1, 1, 1).cuda()
+                    interp_batch = eps * train_batch + (1 - eps) * gen_imgs
+                    disc_interp  = disc.forward(interp_batch)
+                    discriminator_loss = disc_loss_fn(disc_real, disc_fake, disc_interp, interp_batch, lamb)
+                else:
+                    # Calculate loss using AMP
+                    discriminator_loss = disc_loss_fn(disc_real, disc_fake)
 
             # Opimization for discriminator
             optim_discriminator.zero_grad(set_to_none=True)
@@ -160,7 +166,7 @@ def train_model(
                         dataset_name="cub",
                         dataset_resolution=32,
                         z_dimension=128,
-                        batch_size=128,
+                        batch_size=batch_size,
                         num_gen=10_000,
                     )
                     print(f"Iteration {iters} FID: {fid}")
@@ -181,12 +187,14 @@ def train_model(
             scaler.update()
             iters += 1
             pbar.update(1)
+
+
     fid = get_fid(
         gen,
         dataset_name="cub",
         dataset_resolution=32,
         z_dimension=128,
-        batch_size=128,
+        batch_size=batch_size,
         num_gen=50_000,
     )
     print(f"Final FID (Full 50K): {fid}")
