@@ -43,11 +43,19 @@ class Encoder(nn.Module):
 class VAEEncoder(Encoder):
     def __init__(self, input_shape, latent_dim):
         super().__init__(input_shape, latent_dim)
-        #TODO 2.4: fill in self.fc, such that output dimension is 2*self.latent_dim
+
+        self.latent_dim = latent_dim
+
+        # 2.4: fill in self.fc, such that output dimension is 2*self.latent_dim
+        self.fc = nn.Linear(torch.prod(torch.tensor(input_shape)), 2*latent_dim)
+        
 
     def forward(self, x):
-        #TODO 2.4: forward pass through the network.
+        # 2.4: forward pass through the network.
         # should return a tuple of 2 tensors, mu and log_std
+        x       = self.fc(x)
+        mu      = x[:self.latent_dim]
+        log_std = x[self.latent_dim:]
         return mu, log_std
 
 

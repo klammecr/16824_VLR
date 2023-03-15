@@ -24,11 +24,30 @@ def ae_loss(model, x):
 
 def vae_loss(model, x, beta = 1):
     """
-    TODO 2.5 : Fill in recon_loss and kl_loss.
+    2.5 : Fill in recon_loss and kl_loss.
     NOTE: For the kl loss term for the VAE, implement the loss in closed form, you can find the formula here:
     (https://stats.stackexchange.com/questions/318748/deriving-the-kl-divergence-loss-for-vaes).
     return loss, {recon_loss = loss}
     """
+    # Sample eps from a standard normal
+    eps = torch.randn(x.shape)
+
+    # Q is the encoder, take the learned sigma and covariance
+    Q_mu, Q_sigma = model.encoder(x)
+
+    # Calculate the KL divergence for the batch
+    kl_loss = 1/2 * (torch.sum(Q_mu**2) + torch.sum(Q_sigma**2) - torch.sum(Q_sigma**2 + 1)) #- beta
+
+    # This is the "learned" latent representation of the image, we want to see how well this reconstructs the image
+    z_given_x = eps * Q_sigma + Q_mu
+    f_z       = model.decoder(z_given_x)
+
+    # Calculate the reconstruction loss
+    recon_loss = torch.norm(x - f_z)**2
+
+    # Total loss is just the sum
+    total_loss = recon_loss + kl_loss
+
     return total_loss, OrderedDict(recon_loss=recon_loss, kl_loss=kl_loss)
 
 
