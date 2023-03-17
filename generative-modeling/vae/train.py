@@ -16,10 +16,12 @@ from utils import *
 
 def ae_loss(model, x):
     """
-    TODO 2.2: fill in MSE loss between x and its reconstruction.
+    2.2: fill in MSE loss between x and its reconstruction.
     return loss, {recon_loss = loss}
     """
-    loss = F.mse_loss(model.decoder(model.encoder(x)), x)
+    recon_residual = (x - model.decoder(model.encoder(x))).view(x.shape[0], -1)
+    loss = torch.norm(recon_residual, dim = 1)**2
+    loss = loss.mean()
     return loss, OrderedDict(recon_loss=loss)
 
 def vae_loss(model, x, beta = 1):
@@ -29,26 +31,30 @@ def vae_loss(model, x, beta = 1):
     (https://stats.stackexchange.com/questions/318748/deriving-the-kl-divergence-loss-for-vaes).
     return loss, {recon_loss = loss}
     """
-    # Sample eps from a standard normal
-    eps = torch.randn(x.shape)
 
     # Q is the encoder, take the learned sigma and covariance
-    Q_mu, Q_sigma = model.encoder(x)
+    Q_mu, Q_log_sigma = model.encoder(x)
+    Q_sigma           = torch.exp(Q_log_sigma)
 
     # Calculate the KL divergence for the batch
-    kl_loss = 1/2 * (torch.sum(Q_mu**2) + torch.sum(Q_sigma**2) - torch.sum(Q_sigma**2 + 1)) #- beta
+    kl_loss = 1/2 * (torch.sum(Q_mu**2, dim = 1) + torch.sum(Q_sigma, dim = 1) - torch.sum(Q_log_sigma + 1, dim = 1))
+
+    # Sample eps from a standard normal
+    eps = torch.randn(Q_mu.shape).view(Q_mu.shape[0], -1).cuda()
 
     # This is the "learned" latent representation of the image, we want to see how well this reconstructs the image
-    z_given_x = eps * Q_sigma + Q_mu
+    z_given_x = eps * Q_sigma ** 0.5 + Q_mu
     f_z       = model.decoder(z_given_x)
 
     # Calculate the reconstruction loss
-    recon_loss = torch.norm(x - f_z)**2
+    recon_residual = (x - f_z).view(x.shape[0], -1)
+    recon_loss = torch.norm(recon_residual, dim = 1)**2
 
     # Total loss is just the sum
-    total_loss = recon_loss + kl_loss
+    kl_loss   *= beta
+    total_loss = (recon_loss + kl_loss).mean()
 
-    return total_loss, OrderedDict(recon_loss=recon_loss, kl_loss=kl_loss)
+    return total_loss, OrderedDict(recon_loss=recon_loss.mean(), kl_loss=kl_loss.mean())
 
 
 def constant_beta_scheduler(target_val = 1):
@@ -58,12 +64,14 @@ def constant_beta_scheduler(target_val = 1):
 
 def linear_beta_scheduler(max_epochs=None, target_val = 1):
     """
-    TODO 2.8 : Fill in helper. The value returned should increase linearly
+    2.8 : Fill in helper. The value returned should increase linearly
     from 0 at epoch 0 to target_val at epoch max_epochs
     """
-    #def _helper(epoch):
-    #return _helper
-    pass
+    # Linear increase
+    def _helper(epoch):
+        return target_val * (epoch/max_epochs)
+
+    return _helper
 
 def run_train_epoch(model, loss_mode, train_loader, optimizer, beta = 1, grad_clip = 1):
     model.train()

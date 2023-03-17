@@ -53,9 +53,9 @@ class VAEEncoder(Encoder):
     def forward(self, x):
         # 2.4: forward pass through the network.
         # should return a tuple of 2 tensors, mu and log_std
-        x       = self.fc(x)
-        mu      = x[:self.latent_dim]
-        log_std = x[self.latent_dim:]
+        x       = self.fc(x.view(x.shape[0], -1))
+        mu      = x[:, :self.latent_dim]
+        log_std = x[:, self.latent_dim:]
         return mu, log_std
 
 

@@ -29,25 +29,26 @@ class DiffusionModel(nn.Module):
         self.num_timesteps = self.betas.shape[0]
 
         alphas = 1. - self.betas
-        # TODO 3.1: compute the cumulative products for current and previous timesteps
-        self.alphas_cumprod = ...
-        self.alphas_cumprod_prev =  ...
 
-        # TODO 3.1: pre-compute values needed for forward process
+        # 3.1: compute the cumulative products for current and previous timesteps
+        self.alphas_cumprod      = torch.cumprod(alphas)
+        self.alphas_cumprod_prev =  torch.cat(torch.tensor([1]), self.alphas_cumprod[1:])
+
+        # 3.1: pre-compute values needed for forward process
         # This is the coefficient of x_t when predicting x_0
-        self.x_0_pred_coef_1 = ...
+        self.x_0_pred_coef_1 = 1/self.alphas_cumprod[-1]
         # This is the coefficient of pred_noise when predicting x_0
-        self.x_0_pred_coef_2 = ...
+        self.x_0_pred_coef_2 = torch.sqrt(1 - self.alphas_cumprod[-1]) / self.alphas_cumprod[-1]
 
-        # TODO 3.1: compute the coefficients for the mean
+        # 3.1: compute the coefficients for the mean
         # This is coefficient of x_0 in the DDPM section
-        self.posterior_mean_coef1 = ...
+        self.posterior_mean_coef1 = (torch.sqrt(self.alphas_cumprod_prev) * self.betas) / (1 - self.alphas_cumprod)
         # This is coefficient of x_t in the DDPM section
-        self.posterior_mean_coef2 = ...
+        self.posterior_mean_coef2 = (torch.sqrt(self.alphas_cumprod) * (1 - self.alphas_cumprod_prev)) / (1 - self.alphas_cumprod)
 
-        # TODO 3.1: compute posterior variance
+        # 3.1: compute posterior variance
         # calculations for posterior q(x_{t-1} | x_t, x_0) in DDPM
-        self.posterior_variance = ...
+        self.posterior_variance = self.betas * ((1 - self.alphas_cumprod_prev) / (1 - self.alphas_cumprod))
         self.posterior_log_variance_clipped = torch.log(
             self.posterior_variance.clamp(min =1e-20))
 
@@ -59,9 +60,15 @@ class DiffusionModel(nn.Module):
         self.ddim_sampling_eta = ddim_sampling_eta
 
     def get_posterior_parameters(self, x_0, x_t, t):
-        # TODO 3.1: Compute the posterior mean and variance for x_{t-1}
+        # 3.1: Compute the posterior mean and variance for x_{t-1}
         # using the coefficients, x_t, and x_0
         # hint: can use extract function from utils.py
+
+        # TODO: Use extract
+        posterior_mean     = self.posterior_mean_coef1[t] * x_0 + self.posterior_mean_coef2[t] * x_t
+        posterior_variance = self.posterior_variance[t]
+        posterior_log_variance_clipped = torch.log(posterior_variance)
+
         return posterior_mean, posterior_variance, posterior_log_variance_clipped
 
     def model_predictions(self, x_t, t):
