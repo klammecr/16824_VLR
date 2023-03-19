@@ -30,5 +30,32 @@
             "justMyCode": false,
             "args": ["--log_dir", "vae_latent_rep", "--loss_mode", "vae", "--latent_size", "1024"]
         },
+        {
+            "name": "Diffusion DDPM",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": ["--ckpt", "epoch_199.pth", "--sampling-method", "ddpm"]
+        },
+        {
+            "name": "Diffusion DDIM",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": ["--ckpt", "epoch_199.pth", "--sampling-method", "ddim", "--ddim-timesteps", "100", "--ddim-eta", "0"]
+        },
+        {
+            "name": "Run Infer",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": ["--ckpt", "epoch_199.pth", "--sampling-method", "ddpm", "--compute-fid"]
+        }
     ]
 }

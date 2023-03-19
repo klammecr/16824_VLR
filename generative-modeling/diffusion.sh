@@ -1,0 +1,2 @@
+python diffusion/inference.py --ckpt epoch_199.pth --sampling-method ddpm --compute-fid
+python diffusion/inference.py --ckpt epoch_199.pth --sampling-method ddim --ddim-timesteps 100 --ddim-eta 0 --compute-fid

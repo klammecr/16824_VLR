@@ -1,6 +1,8 @@
 *.venv*
 data_gan*
 data_ls_gan*
+data_ddim*
+data_ddpm
 data*
 
 vae_solutions/data/
@@ -17,3 +19,7 @@ __pycache__
 diffusion_solutions/data_ddim/
 diffusion_solutions/data_ddpm/
 diffusion_solutions/epoch_199.pth
+
+*epoch_199*
+
+assignment*
