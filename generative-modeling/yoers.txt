@@ -1,0 +1,1 @@
+compute FID of a model with cifar10-32 statistics

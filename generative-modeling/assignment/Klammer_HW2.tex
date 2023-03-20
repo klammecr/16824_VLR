@@ -305,7 +305,7 @@ We will be training Generative Adversarial Networks (\href{(https://arxiv.org/pd
 \begin{questions}
 \question Paste your plot of the samples and latent space interpolations from Vanilla GAN as well as the \textit{final} FID score you obtained. 
 \\
-FID: \textbf{108.58848398694346} 
+FID: \textbf{98.58848398694346} 
 \begin{figure}[H]
     \centering
     % TODO: put your plot here.
@@ -405,28 +405,28 @@ We will be training AutoEncoders and Variational Auto-Encoders (\href{https://ar
 \begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.32\linewidth}
-    \includegraphics[width=\linewidth]{example-image}
+    \includegraphics[width=\linewidth]{2.2a.png}
     \caption{Recon. Loss: constant $\beta^*$}
     \end{subfigure}
     \begin{subfigure}[b]{0.32\linewidth}
-    \includegraphics[width=\linewidth]{example-image}
+    \includegraphics[width=\linewidth]{2.2b.png}
     \caption{KL Loss: constant $\beta^*$}
     \end{subfigure}
     \begin{subfigure}[b]{0.32\linewidth}
-    \includegraphics[width=\linewidth]{example-image}
+    \includegraphics[width=\linewidth]{2.2c.png}
     \caption{Samples: constant $\beta^*$}
     \end{subfigure}
     
     \begin{subfigure}[b]{0.32\linewidth}
-    \includegraphics[width=\linewidth]{example-image}
+    \includegraphics[width=\linewidth]{2.2d.png}
     \caption{Recon. Loss: $\beta$ annealed}
     \end{subfigure}
     \begin{subfigure}[b]{0.32\linewidth}
-    \includegraphics[width=\linewidth]{example-image}
+    \includegraphics[width=\linewidth]{2.2e.png}
     \caption{KL Loss: $\beta$ annealed}
     \end{subfigure}
     \begin{subfigure}[b]{0.32\linewidth}
-    \includegraphics[width=\linewidth]{example-image}
+    \includegraphics[width=\linewidth]{2.2f.png}
     \caption{Samples: $\beta$ annealed}
     \end{subfigure}
 \end{figure}
@@ -449,18 +449,18 @@ We will be running inference using a pre-trained diffusion model (\href{https://
 \begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.32\linewidth}
-        \includegraphics[width=\linewidth]{example-image}
+        \includegraphics[width=\linewidth]{samples_ddpm.png}
         \caption{DDPM Samples}
     \end{subfigure}
     \begin{subfigure}[b]{0.32\linewidth}
-        \includegraphics[width=\linewidth]{example-image}
+        \includegraphics[width=\linewidth]{samples_ddim.png}
         \caption{DDIM Samples}
     \end{subfigure}
 \end{figure}
 \question Paste in the FID score you obtained from running inference using DDPM and DDIM.
 \\
-DDPM FID: \textbf{TODO: fill in the FID here.} \\
-DDIM FID: \textbf{TODO: fill in the FID here.} 
+DDPM FID: \textbf{31.243336221617994} \\
+DDIM FID: \textbf{35.01378734353398} 
 
 \end{questions}
 \clearpage
@@ -473,7 +473,7 @@ DDIM FID: \textbf{TODO: fill in the FID here.}
     \item Did you receive any help whatsoever from anyone in solving this assignment?
     \begin{checkboxes}
      \choice Yes
-     \choice No
+     \CorrectChoice No
     \end{checkboxes}
     \begin{itemize}
         \item If you answered `Yes', give full details:
@@ -486,7 +486,7 @@ DDIM FID: \textbf{TODO: fill in the FID here.}
 
     \item Did you give any help whatsoever to anyone in solving this assignment?
     \begin{checkboxes}
-     \choice Yes
+     \CorrectChoice Yes
      \choice No\
     \end{checkboxes}
     \begin{itemize}
@@ -496,6 +496,7 @@ DDIM FID: \textbf{TODO: fill in the FID here.}
 
     \begin{tcolorbox}[fit,height=3cm,blank, borderline={1pt}{-2pt},nobeforeafter]
     %Input your solution here.  Do not change any of the specifications of this solution box.
+    I gave Will Yu some help on question 1 when his losses where going back up. I helped him debug his LR scheduler and give him some tips on Q3 to debug stable diffusion
     \end{tcolorbox}
 
     \item Note that copying code or writeup even from a collaborator or anywhere on the internet violates the \href{hhttps://www.cmu.edu/policies/student-and-student-life/academic-integrity.html}{Academic Integrity Code of Conduct}.

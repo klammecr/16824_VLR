@@ -1,1 +1,4 @@
 compute FID of a model with cifar10-32 statistics
+FID:  31.243336221617994
+compute FID of a model with cifar10-32 statistics
+FID:  35.01378734353398
